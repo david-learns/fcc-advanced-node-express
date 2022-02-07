@@ -32,6 +32,12 @@ app.set('views', './views');
 app.set('view engine', 'pug');
 
 
+
+const loginOptions = {
+  failureRedirect: '/'
+};
+
+
 myDB(async client => {
 
   const myDatabase = await client.db().collection('users');
@@ -51,14 +57,39 @@ myDB(async client => {
   app.route('/').get((req, res) => {
     res.render('pug', {
       showLogin: true,
+      showRegistration: true,
       title: 'Connected to Database',
       message: 'Please login'
     });
   });
 
-  const loginOptions = {
-    failureRedirect: '/'
-  }
+  app.route('/register').post((req, res, next) => {
+    myDatabase.findOne({ username: req.body.username }, function (err, user) {
+      if (err) {
+        next(err);
+      } else if (user) {
+        res.redirect('/');
+      } else {
+        myDatabase.insertOne({
+          username: req.body.username,
+          password: req.body.password
+        },
+          (err, doc) => {
+            if (err) {
+              res.redirect('/');
+            } else {
+              next(null, doc.ops[0]);
+            }
+          }
+        )
+      }
+    });
+  },
+    passport.authenticate('local', loginOptions),
+    (req, res, next) => {
+      res.redirect('/profile');
+    }
+  );
 
   app.route('/login').post(passport.authenticate('local', loginOptions), (req, res) => {
     res.redirect('/profile');
@@ -86,7 +117,7 @@ myDB(async client => {
   });
 
   passport.deserializeUser((id, done) => {
-    myDB.findOne({ _id: new ObjectID(id) }, (err, doc) => {
+    myDatabase.findOne({ _id: new ObjectID(id) }, (err, doc) => {
       done(null, doc);
     });
   });
