@@ -6,6 +6,7 @@ const session = require('express-session');
 const myDB = require('./connection');
 const fccTesting = require('./freeCodeCamp/fcctesting.js');
 const passport = require('passport');
+const LocalStrategy = require('passport-local');
 const ObjectID = require('mongodb').ObjectID;
 
 
@@ -31,22 +32,51 @@ app.set('views', './views');
 app.set('view engine', 'pug');
 
 
-app.route('/').get((req, res) => {
-res.render('pug', {
-    title: 'Connected to Database',
-    message: 'Please login'
-});
-});
+myDB(async client => {
 
-passport.serializeUser((user, done) => {
+  const myDatabase = await client.db().collection('users');
+
+  passport.use(new LocalStrategy(
+    function (username, password, done) {
+      myDatabase.findOne({ username: username }, function (err, user) {
+        console.log('User '+ username +' attempted to log in.');
+        if (err) { return done(err) }
+        if (!user) { return done(null, false) }
+        if (password !== user.password) { return done(null, false) }
+        return done(null, user);
+      });
+    }
+  ));
+
+  app.route('/').get((req, res) => {
+    res.render('pug', {
+      title: 'Connected to Database',
+      message: 'Please login'
+    });
+  });
+
+  passport.serializeUser((user, done) => {
     done(null, user._id);
+  });
+
+  passport.deserializeUser((id, done) => {
+    myDB.findOne({ _id: new ObjectID(id) }, (err, doc) => {
+      done(null, doc);
+    });
+  });
+
+
+}).catch(e => {
+
+  app.route('/').get((req, res) => {
+    res.render('pug', {
+      title: e,
+      message: 'Unable to login'
+    });
+  });
+
 });
 
-passport.deserializeUser((id, done) => {
-    // myDB.findOne({ _id: new ObjectID(id) }, (err, doc) => {
-        done(null, null);
-    // });
-});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
