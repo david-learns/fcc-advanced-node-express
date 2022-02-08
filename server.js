@@ -6,8 +6,6 @@ const session = require('express-session');
 const myDB = require('./connection');
 const fccTesting = require('./freeCodeCamp/fcctesting.js');
 const passport = require('passport');
-const http = require('http').createServer(app);
-const io = require('socket.io')(http);
 
 
 
@@ -17,6 +15,8 @@ const auth = require('./auth.js');
 
 
 const app = express();
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
 
 
 

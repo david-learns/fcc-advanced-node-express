@@ -46,12 +46,12 @@ module.exports = function (app, myDatabase) {
     },
         passport.authenticate('local', loginOptions),
         (req, res, next) => {
-            res.redirect('pug/profile');
+            res.redirect('/profile');
         }
     );
 
     app.route('/login').post(passport.authenticate('local', loginOptions), (req, res) => {
-        res.redirect('pug/profile');
+        res.redirect('/profile');
     });
 
     app.route('/profile').get(ensureAuthenticated, (req, res) => {
@@ -67,7 +67,7 @@ module.exports = function (app, myDatabase) {
 
     app.route('/auth/github/callback').get(passport.authenticate('github', loginOptions), (req, res) => {
         req.session.user_id = req.user.id;
-        res.redirect('pug/chat');
+        res.redirect('/chat');
     });
 
     app.route('/auth/github').get(passport.authenticate('github'));
