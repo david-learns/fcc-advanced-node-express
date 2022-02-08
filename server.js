@@ -19,7 +19,6 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 
 
-
 fccTesting(app); //For FCC testing purposes
 app.use('/public', express.static(process.cwd() + '/public'));
 app.use(express.json());
@@ -48,8 +47,12 @@ myDB(async client => {
   routes(app, myDatabase);
   auth(myDatabase);
 
+  let currentUsers = 0;
+
   io.on('connection', socket => {
     console.log('A user has connected');
+    ++currentUsers;
+    io.emit('user count', currentUsers);
   });
 
 }).catch(e => {
