@@ -44,7 +44,7 @@ myDB(async client => {
   const myDatabase = await client.db().collection('users');
 
   routes(app, myDatabase);
-  auth(app, myDatabase);
+  auth(myDatabase);
 
 }).catch(e => {
 

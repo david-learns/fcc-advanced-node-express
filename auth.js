@@ -5,7 +5,7 @@ const LocalStrategy = require('passport-local');
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 
-module.exports = function (app, myDatabase) {
+module.exports = function (myDatabase) {
 
     passport.use(new LocalStrategy(
         function (username, password, done) {
