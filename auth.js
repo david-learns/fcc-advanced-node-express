@@ -1,7 +1,9 @@
 'use strict';
 
+require('dotenv').config();
 const ObjectID = require('mongodb').ObjectID;
 const LocalStrategy = require('passport-local');
+const GithubStrategy = require('passport-github').Strategy;
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 
@@ -18,6 +20,17 @@ module.exports = function (myDatabase) {
             });
         }
     ));
+
+    passport.use(new GithubStrategy({
+        clientID: process.env.GITHUB_CLIENT_ID,
+        clientSecret: process.env.GITHUB_CLIENT_SECRET,
+        callbackURL: 'https://fcc-advanced-node-express-g5xxe.ondigitalocean.app/auth/github/callback'
+    },
+        function (accessToken, refreshToken, profile, cb) {
+            console.log(profile);
+            
+        }
+    ))
 
     passport.serializeUser((user, done) => {
         done(null, user._id);
